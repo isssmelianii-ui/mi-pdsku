@@ -1,5 +1,35 @@
 const productModel = require('../models/productModel');
 
+// Helper fungsi validasi gambar Base64
+function validateBase64Image(image) {
+    // 1. Cek apakah field image kosong atau tidak dikirim
+    if (!image || typeof image !== 'string' || image.trim() === '') {
+        return { valid: false, message: 'Field image wajib diisi' };
+    }
+
+    // 2. Buang Data URI prefix jika ada (contoh: "data:image/png;base64,")
+    let base64Data = image;
+    if (base64Data.includes(',')) {
+        base64Data = base64Data.split(',')[1];
+    }
+
+    // 3. Cek apakah format Base64 valid (Panjang habis dibagi 4 & karakter regex)
+    const isLengthValid = base64Data.length % 4 === 0;
+    const base64Regex = /^[A-Za-z0-9+/]+={0,2}$/;
+    if (!isLengthValid || !base64Regex.test(base64Data)) {
+        return { valid: false, message: 'Field image harus berupa Base64 yang valid' };
+    }
+
+    // 4. Cek ukuran hasil decode (Maksimal 2 MB = 2.097.152 Byte)
+    const imageSizeInBytes = Buffer.byteLength(base64Data, 'base64');
+    const maxSize = 2 * 1024 * 1024; // 2 MB
+    if (imageSizeInBytes > maxSize) {
+        return { valid: false, message: 'Ukuran image maksimal 2 MB' };
+    }
+
+    return { valid: true, cleanBase64: base64Data };
+}
+
 // GET ambil semua products
 async function index(req, res) {
     try {
@@ -39,14 +69,30 @@ async function show(req, res) {
     }
 }
 
-// POST tambah produk (full: name, price, stock wajib)
+// POST tambah produk
 async function createProduct(req, res) {
     try {
-        const { name, description, price, stock } = req.body;
+        const { name, description, price, stock, image } = req.body;
+
+        // Validasi field text umum
         if (!name || price === undefined || stock === undefined) {
             return res.status(400).json({ message: 'Field name, price, dan stock wajib diisi' });
         }
-        const product = await productModel.createProduct({ name, description: description || null, price, stock });
+
+        // Validasi khusus field image
+        const imageValidation = validateBase64Image(image);
+        if (!imageValidation.valid) {
+            return res.status(400).json({ message: imageValidation.message });
+        }
+
+        const product = await productModel.createProduct({ 
+            name, 
+            description: description || null, 
+            price, 
+            stock, 
+            image: imageValidation.cleanBase64 
+        });
+
         res.status(201).json({
             message: 'Berhasil menambah data produk',
             data: product
@@ -59,22 +105,40 @@ async function createProduct(req, res) {
     }
 }
 
-// PUT update produk (full: name, price, stock wajib)
+// PUT update produk
 async function updateProduct(req, res) {
     try {
         const id = Number(req.params.id);
         if (!Number.isInteger(id) || id <= 0) {
             return res.status(400).json({ message: 'ID produk tidak valid' });
         }
-        const { name, description, price, stock } = req.body;
+
+        const { name, description, price, stock, image } = req.body;
+
+        // Validasi field text umum
         if (!name || price === undefined || stock === undefined) {
             return res.status(400).json({ message: 'Field name, price, dan stock wajib diisi' });
         }
+
+        // Validasi khusus field image (Aturan sama persis seperti Create)
+        const imageValidation = validateBase64Image(image);
+        if (!imageValidation.valid) {
+            return res.status(400).json({ message: imageValidation.message });
+        }
+
         const existing = await productModel.getProductById(id);
         if (!existing) {
             return res.status(404).json({ message: 'Produk tidak ditemukan' });
         }
-        const product = await productModel.updateProduct(id, { name, description: description || null, price, stock });
+
+        const product = await productModel.updateProduct(id, { 
+            name, 
+            description: description || null, 
+            price, 
+            stock, 
+            image: imageValidation.cleanBase64 
+        });
+
         res.status(200).json({
             message: 'Berhasil memperbarui data produk',
             data: product
