@@ -1,11 +1,11 @@
 from datetime import datetime
 from bson import ObjectId
-from app.database import db
+import app.database as database
 
 class ReviewModel:
     @staticmethod
     def get_collection():
-        return db["reviews"]
+        return database.db["reviews"]
 
     @staticmethod
     def create(data):

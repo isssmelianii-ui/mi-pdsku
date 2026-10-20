@@ -6,7 +6,7 @@ class ProductClient:
     @staticmethod
     def check_product_exists(product_id):
         product_service_url = os.getenv("PRODUCT_SERVICE_URL", "http://localhost:3000")
-        url = f"{product_service_url}/api/products/{product_id}"
+        url = f"{product_service_url}/products/{product_id}"
         
         try:
             response = requests.get(url, timeout=5)

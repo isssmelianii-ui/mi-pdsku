@@ -1,7 +1,7 @@
 from flask import Blueprint
 from app.controllers.review_controller import ReviewController
 
-review_bp = Blueprint("reviews", __url_prefix__="/api/reviews")
+review_bp = Blueprint("reviews", __name__)
 
 @review_bp.route("/reviews", methods=["POST"])
 def create_review():
