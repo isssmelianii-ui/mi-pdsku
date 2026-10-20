@@ -47,6 +47,8 @@ class CartController extends Controller
                 'message' => 'Item berhasil ditambahkan ke keranjang',
                 'data' => $item,
             ], $item->wasRecentlyCreated ? 201 : 200);
+        } catch (ProductNotFoundException $e) {
+            return response()->json(['message' => $e->getMessage()], 404);
         } catch (Throwable $e) {
             return $this->errorResponse($e, 'menambahkan item');
         }

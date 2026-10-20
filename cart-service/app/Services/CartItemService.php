@@ -3,10 +3,14 @@
 namespace App\Services;
 
 use App\Exceptions\CartItemNotFoundException;
+use App\Exceptions\ProductNotFoundException;
 use App\Models\CartItem;
 
 class CartItemService
 {
+    public function __construct(private ProductService $productService)
+    {
+    }
     // ambil data keranjang
     public function getCart(int $userId)
     {

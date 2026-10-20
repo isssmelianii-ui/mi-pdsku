@@ -1,0 +1,8 @@
+### **4. File: `.gitignore`**
+*(Buat file bernama `.gitignore` di dalam folder `review-service`)*[cite: 8]
+```text
+venv/
+__pycache__/
+*.pyc
+.env
+```[cite: 8]
