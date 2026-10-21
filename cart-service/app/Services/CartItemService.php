@@ -8,9 +8,8 @@ use App\Models\CartItem;
 
 class CartItemService
 {
-    public function __construct(private ProductService $productService)
-    {
-    }
+    public function __construct(private ProductService $productService) {}
+
     // ambil data keranjang
     public function getCart(int $userId)
     {
@@ -19,34 +18,39 @@ class CartItemService
         return [
             'user_id' => $userId,
             'items' => $items,
-            'total_quantity' => $items->sum('quantity')
+            'total_quantity' => $items->sum('quantity'),
         ];
     }
 
     // tambah item ke keranjang
     public function addItem(int $userId, int $productId, int $quantity): CartItem
     {
+        if (! $this->productService->getProduct($productId)) {
+            throw new ProductNotFoundException($productId);
+        }
+
         $item = CartItem::firstOrNew([
             'user_id' => $userId,
-            'product_id' => $productId
+            'product_id' => $productId,
         ]);
 
         $item->quantity = ($item->exists ? $item->quantity : 0) + $quantity;
 
         $item->save();
+
         return $item;
     }
-    
+
     // update keranjang
     public function updateQuantity(int $id, int $quantity): CartItem
     {
         $item = CartItem::find($id);
-        if (!$item) {
+        if (! $item) {
             throw new CartItemNotFoundException($id);
         }
 
         $item->update([
-            'quantity' => $quantity
+            'quantity' => $quantity,
         ]);
 
         return $item;
@@ -64,5 +68,3 @@ class CartItemService
         return CartItem::where('user_id', $userId)->delete();
     }
 }
-
-?>

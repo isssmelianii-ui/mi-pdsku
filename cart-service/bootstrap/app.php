@@ -9,9 +9,10 @@ use Illuminate\Http\Request;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
-        api: __DIR__ . '/../routes/api.php',
+        web: __DIR__.'/../routes/web.php',
+        api: __DIR__.'/../routes/api.php',
         apiPrefix: '', // endpoint tanpa awalan /api, sama seperti product-service
-        commands: __DIR__ . '/../routes/console.php',
+        commands: __DIR__.'/../routes/console.php',
         health: '/up', // endpoint cek hidup bawaan Laravel
     )
     ->withMiddleware(function (Middleware $middleware): void {

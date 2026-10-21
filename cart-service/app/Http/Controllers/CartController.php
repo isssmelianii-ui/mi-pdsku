@@ -1,9 +1,11 @@
 <?php
 
 // app/Http/Controllers/CartController.php
+
 namespace App\Http\Controllers;
 
 use App\Exceptions\CartItemNotFoundException;
+use App\Exceptions\ProductServiceUnavailableException;
 use App\Http\Requests\AddCartItemRequest;
 use App\Http\Requests\UpdateCartItemRequest;
 use App\Services\CartItemService;
@@ -14,9 +16,7 @@ use Throwable;
 class CartController extends Controller
 {
     // Properti disesuaikan menjadi $cartService
-    public function __construct(private CartItemService $cartService)
-    {
-    }
+    public function __construct(private CartItemService $cartService) {}
 
     // GET /carts/{userId}
     public function show(int $userId): JsonResponse
@@ -49,6 +49,12 @@ class CartController extends Controller
             ], $item->wasRecentlyCreated ? 201 : 200);
         } catch (ProductNotFoundException $e) {
             return response()->json(['message' => $e->getMessage()], 404);
+        } catch (ProductServiceUnavailableException $e) {
+            Log::warning('Product-service tidak tersedia saat menambahkan item', [
+                'error' => $e->getMessage(),
+            ]);
+
+            return response()->json(['message' => $e->getMessage()], 502);
         } catch (Throwable $e) {
             return $this->errorResponse($e, 'menambahkan item');
         }
@@ -59,6 +65,7 @@ class CartController extends Controller
     {
         try {
             $item = $this->cartService->updateQuantity($id, $request->validated()['quantity']);
+
             return response()->json([
                 'message' => 'Jumlah item berhasil diperbarui',
                 'data' => $item,
@@ -75,6 +82,7 @@ class CartController extends Controller
     {
         try {
             $this->cartService->removeItem($id);
+
             return response()->json(['message' => 'Item berhasil dihapus dari keranjang']);
         } catch (CartItemNotFoundException $e) {
             return response()->json(['message' => $e->getMessage()], 404);
@@ -111,7 +119,7 @@ class CartController extends Controller
 
         if (config('app.debug')) {
             $body['error'] = $e->getMessage();
-            $body['location'] = $e->getFile() . ':' . $e->getLine();
+            $body['location'] = $e->getFile().':'.$e->getLine();
         }
 
         return response()->json($body, 500);
