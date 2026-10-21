@@ -64,7 +64,7 @@ services:
     environment:
       - HOST=0.0.0.0
       - PORT=3002
-      - FLASK_DEBUG=1
+      - FLASK_DEBUG=0
       - MONGO_URI=mongodb://appuser:apppassword@review-db:27017/?authSource=admin
       - MONGO_DB_NAME=reviewdb
       - PRODUCT_SERVICE_URL=http://product-service:3000
@@ -73,6 +73,12 @@ services:
         condition: service_healthy
       product-service:
         condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:3002/health', timeout=3)"]
+      interval: 10s
+      retries: 5
+      start_period: 10s
+      timeout: 5s
 
   review-db:
     image: mongo:7

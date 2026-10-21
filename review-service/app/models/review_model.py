@@ -47,7 +47,7 @@ class ReviewModel:
         result = ReviewModel.get_collection().update_one(
             {"_id": ObjectId(review_id)}, {"$set": data}
         )
-        return result.modified_count > 0
+        return result.matched_count > 0
 
     @staticmethod
     def delete(review_id):

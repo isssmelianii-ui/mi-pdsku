@@ -74,9 +74,15 @@ async function createProduct(req, res) {
     try {
         const { name, description, price, stock, image } = req.body;
 
-        // Validasi field text umum
-        if (!name || price === undefined || stock === undefined) {
-            return res.status(400).json({ message: 'Field name, price, dan stock wajib diisi' });
+        // Validasi field dan tipe data sebelum mengakses database.
+        if (typeof name !== 'string' || name.trim() === '' || price === undefined || stock === undefined) {
+            return res.status(400).json({ message: 'Field name, price, dan stock wajib diisi dengan format yang benar' });
+        }
+        if (typeof price !== 'number' || !Number.isFinite(price) || price < 0) {
+            return res.status(400).json({ message: 'Field price harus berupa angka >= 0' });
+        }
+        if (!Number.isSafeInteger(stock) || stock < 0) {
+            return res.status(400).json({ message: 'Field stock harus berupa bilangan bulat >= 0' });
         }
 
         // Validasi khusus field image
@@ -86,10 +92,10 @@ async function createProduct(req, res) {
         }
 
         const product = await productModel.createProduct({ 
-            name, 
-            description: description || null, 
-            price, 
-            stock, 
+            name: name.trim(),
+            description: typeof description === 'string' && description.trim() !== '' ? description.trim() : null,
+            price,
+            stock,
             image: imageValidation.cleanBase64 
         });
 
@@ -115,9 +121,15 @@ async function updateProduct(req, res) {
 
         const { name, description, price, stock, image } = req.body;
 
-        // Validasi field text umum
-        if (!name || price === undefined || stock === undefined) {
-            return res.status(400).json({ message: 'Field name, price, dan stock wajib diisi' });
+        // Validasi field dan tipe data sebelum mengakses database.
+        if (typeof name !== 'string' || name.trim() === '' || price === undefined || stock === undefined) {
+            return res.status(400).json({ message: 'Field name, price, dan stock wajib diisi dengan format yang benar' });
+        }
+        if (typeof price !== 'number' || !Number.isFinite(price) || price < 0) {
+            return res.status(400).json({ message: 'Field price harus berupa angka >= 0' });
+        }
+        if (!Number.isSafeInteger(stock) || stock < 0) {
+            return res.status(400).json({ message: 'Field stock harus berupa bilangan bulat >= 0' });
         }
 
         // Validasi khusus field image (Aturan sama persis seperti Create)
@@ -132,10 +144,10 @@ async function updateProduct(req, res) {
         }
 
         const product = await productModel.updateProduct(id, { 
-            name, 
-            description: description || null, 
-            price, 
-            stock, 
+            name: name.trim(),
+            description: typeof description === 'string' && description.trim() !== '' ? description.trim() : null,
+            price,
+            stock,
             image: imageValidation.cleanBase64 
         });
 

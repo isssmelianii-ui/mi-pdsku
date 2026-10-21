@@ -14,5 +14,9 @@ def create_app():
     @app.route("/", methods=["GET"])
     def index():
         return {"message": "Selamat datang di Review Service API", "status": "running"}
+    
+    @app.route("/health", methods=["GET"])
+    def health():
+        return {"status": "healthy"}, 200
         
     return app

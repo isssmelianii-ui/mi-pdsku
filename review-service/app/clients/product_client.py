@@ -15,7 +15,14 @@ class ProductClient:
                 raise NotFoundError(f"Produk dengan ID {product_id} tidak ditemukan di product-service.")
             elif response.status_code != 200:
                 raise ExternalServiceError("Gagal memvalidasi produk ke layanan eksternal.")
-                
-            return response.json()
+
+            try:
+                payload = response.json()
+            except ValueError as exc:
+                raise ExternalServiceError("Product-service mengembalikan JSON yang tidak valid.") from exc
+
+            if not isinstance(payload, dict) or not isinstance(payload.get("data"), dict):
+                raise ExternalServiceError("Respons product-service tidak berisi data produk yang valid.")
+            return payload
         except requests.exceptions.RequestException:
             raise ExternalServiceError("Tidak dapat terhubung ke product-service.")

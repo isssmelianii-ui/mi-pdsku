@@ -19,7 +19,7 @@ async function createProduct(product) {
         'INSERT INTO products (name, description, price, stock, image) VALUES (?, ?, ?, ?, ?)',
         [name, description, price, stock, image]
     );
-    return result.insertId;
+    return getProductById(result.insertId);
 }
 
 // update produk berdasarkan id (Ditambahkan field image)
