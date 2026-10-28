@@ -102,8 +102,7 @@ class OrderService
         int $userId,
         int $orderId
     ): void {
-        // Order sudah tersimpan. Kegagalan mengosongkan keranjang
-        // tidak boleh membatalkan order yang berhasil dibuat.
+        // Kegagalan mengosongkan keranjang tidak membatalkan order.
         if (!$this->cartClient->clearCart($userId)) {
             Log::error(
                 'Order tersimpan, tetapi keranjang gagal dikosongkan.',
@@ -132,5 +131,30 @@ class OrderService
         }
 
         return $query->orderByDesc('created_at')->get();
+    }
+
+    // 4. Proses perubahan status pesanan menjadi PAID.
+    public function payOrder(int $id): Order
+    {
+        $order = Order::find($id);
+
+        if (!$order) {
+            throw new OrderBusinessException(
+                'Pesanan tidak ditemukan.',
+                404
+            );
+        }
+
+        if ($order->status !== 'PENDING') {
+            throw new OrderBusinessException(
+                'Pesanan tidak dapat dibayar karena statusnya bukan PENDING.',
+                409
+            );
+        }
+
+        $order->status = 'PAID';
+        $order->save();
+
+        return $order->load('items');
     }
 }

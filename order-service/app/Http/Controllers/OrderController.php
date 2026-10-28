@@ -1,4 +1,3 @@
-
 <?php
 
 namespace App\Http\Controllers;
@@ -6,8 +5,8 @@ namespace App\Http\Controllers;
 use App\Exceptions\OrderBusinessException;
 use App\Exceptions\ServiceUnavailableException;
 use App\Http\Requests\StoreOrderRequest;
-use App\Services\OrderService;
 use App\Models\Order;
+use App\Services\OrderService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -141,34 +140,42 @@ class OrderController extends Controller
         ], 200);
     }
 
-    public function pay(string $id): JsonResponse
-    {
+    public function pay()
+        : JsonResponse {
         if (! ctype_digit($id) || (int) $id < 1) {
             return response()->json([
                 'message' => 'Pesanan tidak ditemukan.',
             ], 404);
         }
 
-        $order = Order::find((int) $id);
+        try {
+            $order = $orderService->payOrder((int) $id);
 
-        if (! $order) {
             return response()->json([
-                'message' => 'Pesanan tidak ditemukan.',
-            ], 404);
-        }
-
-        if ($order->status !== 'PENDING') {
+                'message' => 'Pembayaran pesanan berhasil.',
+                'data' => $order,
+            ], 200);
+        } catch (OrderBusinessException $exception) {
             return response()->json([
-                'message' => 'Pesanan tidak dapat dibayar karena statusnya bukan PENDING.',
-            ], 409);
+                'message' => $exception->getMessage(),
+            ], $exception->statusCode);
+        } catch (Throwable $exception) {
+            Log::error(
+                'Gagal memproses pembayaran pesanan.',
+                [
+                    'order_id' => (int) $id,
+                    'error' => $exception->getMessage(),
+                ]
+            );
+
+            return response()->json([
+                'message' => 'Terjadi kesalahan saat memproses pembayaran.',
+                ...(
+                    config('app.debug')
+                        ? ['error' => $exception->getMessage()]
+                        : []
+                ),
+            ], 500);
         }
-
-        $order->status = 'PAID';
-        $order->save();
-
-        return response()->json([
-            'message' => 'Pembayaran pesanan berhasil.',
-            'data' => $order->load('items'),
-        ], 200);
     }
 }
