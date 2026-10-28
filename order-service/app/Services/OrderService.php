@@ -19,7 +19,7 @@ class OrderService
     {
         // 1. Ambil keranjang melalui Cart Service Client.
         $cart = $this->cartClient->getCart($userId);
-        $items = $cart['items'];
+        $items = $cart['items'] ?? [];
 
         if (empty($items)) {
             throw new OrderBusinessException(
@@ -70,11 +70,11 @@ class OrderService
             $subtotal = round($price * $quantity, 2);
 
             $orderItems[] = [
-                'product_id' => $productId,
+                'product_id'   => $productId,
                 'product_name' => $product['name'],
-                'unit_price' => $price,
-                'quantity' => $quantity,
-                'subtotal' => $subtotal,
+                'unit_price'   => $price,
+                'quantity'     => $quantity,
+                'subtotal'     => $subtotal,
             ];
 
             $totalAmount += $subtotal;
@@ -87,8 +87,8 @@ class OrderService
             $totalAmount
         ) {
             $order = Order::create([
-                'user_id' => $userId,
-                'status' => 'PENDING',
+                'user_id'      => $userId,
+                'status'       => 'PENDING',
                 'total_amount' => round($totalAmount, 2),
             ]);
 
@@ -104,14 +104,33 @@ class OrderService
     ): void {
         // Order sudah tersimpan. Kegagalan mengosongkan keranjang
         // tidak boleh membatalkan order yang berhasil dibuat.
-        if (! $this->cartClient->clearCart($userId)) {
+        if (!$this->cartClient->clearCart($userId)) {
             Log::error(
                 'Order tersimpan, tetapi keranjang gagal dikosongkan.',
                 [
-                    'user_id' => $userId,
+                    'user_id'  => $userId,
                     'order_id' => $orderId,
                 ]
             );
         }
+    }
+
+    public function getOrder(int $id): ?Order
+    {
+        return Order::with('items')->find($id);
+    }
+
+    public function getUserOrders(
+        int $userId,
+        ?string $status = null
+    ) {
+        $query = Order::with('items')
+            ->where('user_id', $userId);
+
+        if ($status !== null) {
+            $query->where('status', $status);
+        }
+
+        return $query->orderByDesc('created_at')->get();
     }
 }
