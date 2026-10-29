@@ -17,4 +17,13 @@ class ExampleTest extends TestCase
                 'service' => 'order-service',
             ]);
     }
+
+    public function test_creating_order_without_user_id_returns_422(): void
+    {
+        $response = $this->postJson('/orders', []);
+
+        $response
+            ->assertStatus(422)
+            ->assertJsonValidationErrors(['user_id']);
+    }
 }
