@@ -2,15 +2,27 @@
 
 namespace Tests\Unit;
 
+use App\Exceptions\OrderBusinessException;
 use PHPUnit\Framework\TestCase;
 
 class ExampleTest extends TestCase
 {
-    /**
-     * A basic test example.
-     */
-    public function test_that_true_is_true(): void
+    public function test_business_exception_defaults_to_conflict_status(): void
     {
-        $this->assertTrue(true);
+        $exception = new OrderBusinessException('Keranjang kosong.');
+
+        $this->assertSame('Keranjang kosong.', $exception->getMessage());
+        $this->assertSame(409, $exception->statusCode);
+    }
+
+    public function test_business_exception_accepts_custom_status_code(): void
+    {
+        $exception = new OrderBusinessException(
+            'Pesanan tidak ditemukan.',
+            404
+        );
+
+        $this->assertSame('Pesanan tidak ditemukan.', $exception->getMessage());
+        $this->assertSame(404, $exception->statusCode);
     }
 }
