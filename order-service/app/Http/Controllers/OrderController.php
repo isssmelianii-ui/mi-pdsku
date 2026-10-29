@@ -140,8 +140,10 @@ class OrderController extends Controller
         ], 200);
     }
 
-    public function pay()
-        : JsonResponse {
+    public function pay(
+        string $id,
+        OrderService $orderService
+    ): JsonResponse {
         if (! ctype_digit($id) || (int) $id < 1) {
             return response()->json([
                 'message' => 'Pesanan tidak ditemukan.',
