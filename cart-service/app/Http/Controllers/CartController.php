@@ -1,10 +1,9 @@
 <?php
 
-// app/Http/Controllers/CartController.php
-
 namespace App\Http\Controllers;
 
 use App\Exceptions\CartItemNotFoundException;
+use App\Exceptions\ProductNotFoundException;
 use App\Exceptions\ProductServiceUnavailableException;
 use App\Http\Requests\AddCartItemRequest;
 use App\Http\Requests\UpdateCartItemRequest;
@@ -15,7 +14,6 @@ use Throwable;
 
 class CartController extends Controller
 {
-    // Properti disesuaikan menjadi $cartService
     public function __construct(private CartItemService $cartService) {}
 
     // GET /carts/{userId}
@@ -36,25 +34,33 @@ class CartController extends Controller
     {
         try {
             $data = $request->validated();
+
             $item = $this->cartService->addItem(
                 $data['user_id'],
                 $data['product_id'],
                 $data['quantity'] ?? 1
             );
 
-            // 201 jika item baru, 200 jika hanya menambah jumlah
             return response()->json([
                 'message' => 'Item berhasil ditambahkan ke keranjang',
                 'data' => $item,
             ], $item->wasRecentlyCreated ? 201 : 200);
+
         } catch (ProductNotFoundException $e) {
-            return response()->json(['message' => $e->getMessage()], 404);
+            return response()->json([
+                'message' => $e->getMessage(),
+            ], 404);
+
         } catch (ProductServiceUnavailableException $e) {
             Log::warning('Product-service tidak tersedia saat menambahkan item', [
                 'error' => $e->getMessage(),
+                'cause' => $e->getPrevious()?->getMessage(),
             ]);
 
-            return response()->json(['message' => $e->getMessage()], 502);
+            return response()->json([
+                'message' => $e->getMessage(),
+            ], 502);
+
         } catch (Throwable $e) {
             return $this->errorResponse($e, 'menambahkan item');
         }
@@ -64,14 +70,21 @@ class CartController extends Controller
     public function update(UpdateCartItemRequest $request, int $id): JsonResponse
     {
         try {
-            $item = $this->cartService->updateQuantity($id, $request->validated()['quantity']);
+            $item = $this->cartService->updateQuantity(
+                $id,
+                $request->validated()['quantity']
+            );
 
             return response()->json([
                 'message' => 'Jumlah item berhasil diperbarui',
                 'data' => $item,
             ]);
+
         } catch (CartItemNotFoundException $e) {
-            return response()->json(['message' => $e->getMessage()], 404);
+            return response()->json([
+                'message' => $e->getMessage(),
+            ], 404);
+
         } catch (Throwable $e) {
             return $this->errorResponse($e, 'memperbarui item');
         }
@@ -83,9 +96,15 @@ class CartController extends Controller
         try {
             $this->cartService->removeItem($id);
 
-            return response()->json(['message' => 'Item berhasil dihapus dari keranjang']);
+            return response()->json([
+                'message' => 'Item berhasil dihapus dari keranjang',
+            ]);
+
         } catch (CartItemNotFoundException $e) {
-            return response()->json(['message' => $e->getMessage()], 404);
+            return response()->json([
+                'message' => $e->getMessage(),
+            ], 404);
+
         } catch (Throwable $e) {
             return $this->errorResponse($e, 'menghapus item');
         }
@@ -101,6 +120,7 @@ class CartController extends Controller
                     'deleted_items' => $this->cartService->clearCart($userId),
                 ],
             ]);
+
         } catch (Throwable $e) {
             return $this->errorResponse($e, 'mengosongkan keranjang');
         }
@@ -113,13 +133,16 @@ class CartController extends Controller
             'error' => $e->getMessage(),
             'file' => $e->getFile(),
             'line' => $e->getLine(),
+            'cause' => $e->getPrevious()?->getMessage(),
         ]);
 
-        $body = ['message' => "Gagal {$action}"];
+        $body = [
+            'message' => "Gagal {$action}",
+        ];
 
         if (config('app.debug')) {
             $body['error'] = $e->getMessage();
-            $body['location'] = $e->getFile().':'.$e->getLine();
+            $body['location'] = $e->getFile() . ':' . $e->getLine();
         }
 
         return response()->json($body, 500);
