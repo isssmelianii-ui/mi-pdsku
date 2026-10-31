@@ -201,13 +201,12 @@ Template environment Order Service tersedia di `order-service/.env.example`. Jan
 
 ```text
 mi-pdsku/
-â”œâ”€â”€ cart-service/
-â”œâ”€â”€ product-service/
-â”œâ”€â”€ review-service/
-â”œâ”€â”€ order-service/
-â”œâ”€â”€ ecommerce-ui/
-â”œâ”€â”€ docker-compose.yml
-â””â”€â”€ README.md
+|-- cart-service/
+|-- product-service/
+|-- review-service/
+|-- order-service/
+|-- docker-compose.yml
+|-- README.md
 ```
 
 ## 9. Testing
@@ -230,5 +229,9 @@ Video demonstrasi sistem: **TBA**
 - **Repository:** https://github.com/isssmelianii-ui/mi-pdsku
 - **Demo Video:** TBA
 - **Final Commit SHA:** TBA
+
+
+
+
 
 
