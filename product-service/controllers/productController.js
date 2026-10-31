@@ -175,6 +175,7 @@ async function destroy(req, res) {
         }
 
         const deleted = await productModel.deleteProduct(id);
+        ted = await productModel.deleteProduct(id);
 
         if (!deleted) {
             return res.status(404).json({
