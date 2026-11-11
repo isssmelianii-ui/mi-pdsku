@@ -27,7 +27,8 @@ export async function request(baseUrl, path, {method= 'GET', body} = {}) {
         const payload = await response.json().catch(() => null);
 
         if (!response.ok){
-            throw new ApiError(payload?.message ?? 'Permintaan gagal (${response.status})', {
+            // PERBAIKAN DI SINI: Menggunakan backtick (`` ` ``) agar ${response.status} terbaca
+            throw new ApiError(payload?.message ?? `Permintaan gagal (${response.status})`, {
                 status: response.status,
                 errors: payload?.errors ?? null
             });
