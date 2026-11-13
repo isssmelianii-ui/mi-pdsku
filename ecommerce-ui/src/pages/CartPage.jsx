@@ -1,35 +1,52 @@
-// src/pages/CartPage.jsx
-import { clearCart, removeCartItem, updateCartItem } from '../api/cartApi'
-import { getCartDetail } from '../api/aggregate'
-import AsyncView from '../components/AsyncView'
-import { useAsync } from '../hooks/useAsync'
-import { formatRupiah } from '../utils/format'
+import { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 
 export default function CartPage({ userId }) {
-  const { loading, data, error, reload } = useAsync(() => getCartDetail(userId), [userId])
+  const [cartItems, setCartItems] = useState([])
 
-  async function handleQuantityChange(itemId, qty) {
-    if (qty <= 0) await removeCartItem(itemId)
-    else await updateCartItem(itemId, qty)
-    reload()
+  useEffect(() => {
+    const savedCart = JSON.parse(localStorage.getItem(`cart_user_${userId}`)) || [
+      {
+        id: 1,
+        product: {
+          id: 1,
+          name: 'Laptop Gaming Pro',
+          price: 12000000,
+          image: 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=500&auto=format&fit=crop&q=60'
+        },
+        quantity: 1
+      }
+    ]
+    setCartItems(savedCart)
+  }, [userId])
+
+  const handleRemove = (cartId) => {
+    const updatedCart = cartItems.filter(item => item.id !== cartId)
+    setCartItems(updatedCart)
+    localStorage.setItem(`cart_user_${userId}`, JSON.stringify(updatedCart))
   }
 
-  async function handleRemove(itemId) {
-    await removeCartItem(itemId)
-    reload()
-  }
-
-  async function handleClear() {
-    await clearCart(userId)
-    reload()
-  }
+  const totalPrice = cartItems.reduce((acc, item) => {
+    const price = item.product?.price || 0
+    const qty = item.quantity || 1
+    return acc + price * qty
+  }, 0)
 
   return (
-    <AsyncView loading={loading} error={error} onRetry={reload}>
-      <h2>Keranjang Belanja (User {userId})</h2>
-      {data && data.items.length === 0 && <p className="muted">Keranjang kosong.</p>}
-      {data && data.items.length > 0 && (
-        <div className="cart-container">
+    <div className="container" style={{ padding: '2rem 0' }}>
+      <h2>🛒 Keranjang Belanja Anda (User {userId})</h2>
+
+      {cartItems.length === 0 ? (
+        <div style={{ marginTop: '1.5rem' }}>
+          <div className="alert" style={{ background: '#f5f5f5', color: '#666', border: '1px solid #ddd' }}>
+            Keranjang belanja Anda masih kosong.
+          </div>
+          <Link to="/" style={{ textDecoration: 'none', display: 'inline-block', marginTop: '1rem' }}>
+            <button>Mulai Belanja</button>
+          </Link>
+        </div>
+      ) : (
+        <div>
           <table className="cart-table">
             <thead>
               <tr>
@@ -41,25 +58,23 @@ export default function CartPage({ userId }) {
               </tr>
             </thead>
             <tbody>
-              {data.items.map((item) => (
+              {cartItems.map((item) => (
                 <tr key={item.id}>
-                  <td>{item.product ? item.product.name : `Produk #${item.product_id}`}</td>
-                  <td>{item.product ? formatRupiah(item.product.price) : '-'}</td>
-                  <td>
-                    <input
-                      type="number"
-                      min="1"
-                      value={item.quantity}
-                      onChange={(e) => handleQuantityChange(item.id, Number(e.target.value))}
+                  <td style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                    <img
+                      src={item.product.image}
+                      alt={item.product.name}
+                      style={{ width: '50px', height: '50px', objectFit: 'cover', borderRadius: '4px' }}
                     />
+                    <span style={{ fontWeight: '500' }}>{item.product.name}</span>
+                  </td>
+                  <td>Rp {Number(item.product.price).toLocaleString('id-ID')}</td>
+                  <td>{item.quantity}</td>
+                  <td className="price" style={{ fontSize: '1rem' }}>
+                    Rp {Number(item.product.price * item.quantity).toLocaleString('id-ID')}
                   </td>
                   <td>
-                    {item.product
-                      ? formatRupiah(Number(item.product.price) * item.quantity)
-                      : '-'}
-                  </td>
-                  <td>
-                    <button type="button" onClick={() => handleRemove(item.id)}>
+                    <button className="btn-danger" onClick={() => handleRemove(item.id)}>
                       Hapus
                     </button>
                   </td>
@@ -67,14 +82,20 @@ export default function CartPage({ userId }) {
               ))}
             </tbody>
           </table>
-          <div className="cart-summary">
-            <h3>Total: {formatRupiah(data.totalPrice)}</h3>
-            <button type="button" className="btn-danger" onClick={handleClear}>
-              Kosongkan Keranjang
+
+          <div className="cart-summary card" style={{ marginTop: '2rem' }}>
+            <div>
+              <span className="muted">Total Pembayaran:</span>
+              <div className="price" style={{ fontSize: '1.5rem', marginTop: '0.25rem' }}>
+                Rp {Number(totalPrice).toLocaleString('id-ID')}
+              </div>
+            </div>
+            <button onClick={() => alert('Checkout berhasil! Terima kasih sudah berbelanja.')}>
+              Lanjutkan ke Checkout 🚀
             </button>
           </div>
         </div>
       )}
-    </AsyncView>
+    </div>
   )
 }
