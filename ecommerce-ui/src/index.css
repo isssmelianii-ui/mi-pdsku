@@ -1,188 +1,273 @@
+/* ==========================================
+   1. PENGATURAN DASAR & TIPOGRAFI
+   ================================---------- */
 :root {
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
   color: #213547;
-  background-color: #ffffff;
+  background-color: #f4f6f8;
 }
 
 body {
   margin: 0;
   display: flex;
-  place-content: center;
   min-width: 320px;
   min-height: 100vh;
 }
 
 #root {
   width: 100vw;
-  max-width: 1280px;
   margin: 0 auto;
   text-align: left;
 }
 
-.navbar {
+/* ==========================================
+   2. LAYOUT DASHBOARD ADMIN (SIDEBAR KIRI)
+   ================================---------- */
+.admin-container {
+  display: flex;
+  min-height: 100vh;
+  background-color: #f4f6f8;
+  width: 100%;
+}
+
+.admin-sidebar {
+  width: 260px;
+  background-color: #0f172a;
+  color: #94a3b8;
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 50;
+  box-shadow: 4px 0 10px rgba(0, 0, 0, 0.05);
+}
+
+.admin-sidebar-brand {
+  padding: 1.5rem;
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #ffffff;
+  border-bottom: 1px solid #1e293b;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.admin-sidebar-menu {
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  overflow-y: auto;
+  flex-grow: 1;
+}
+
+.admin-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  color: #cbd5e1;
+  text-decoration: none;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.admin-menu-item:hover {
+  background-color: #1e293b;
+  color: #ffffff;
+}
+
+.admin-menu-item.active {
+  background-color: #4f46e5;
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.admin-main-wrapper {
+  margin-left: 260px;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.admin-topbar {
+  background: #ffffff;
+  padding: 1rem 2rem;
+  border-bottom: 1px solid #e2e8f0;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1rem 2rem;
-  border-bottom: 1px solid #eaeaea;
-  background: #fafafa;
+  position: sticky;
+  top: 0;
+  z-index: 40;
 }
 
-.navbar nav {
-  display: flex;
-  gap: 1.5rem;
-  align-items: center;
-}
-
-.navbar a {
-  text-decoration: none;
-  color: #213547;
-  font-weight: 500;
-}
-
-.navbar a.active {
-  color: #646cff;
-  font-weight: bold;
-}
-
-.container {
+.admin-content {
   padding: 2rem;
+  flex-grow: 1;
 }
 
+/* ==========================================
+   3. LAYOUT KATALOG & FILTER ATAS (FULL-WIDTH)
+   ================================---------- */
+.shop-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.filter-bar {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 1.25rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+}
+
+.category-tabs {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.category-tab-btn {
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  background: #f8fafc;
+  color: #475569;
+  font-weight: 600;
+  font-size: 0.88rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.category-tab-btn:hover {
+  background: #f1f5f9;
+  color: #1e293b;
+}
+
+.category-tab-btn.active {
+  background: #4f46e5;
+  color: #ffffff;
+  border-color: #4f46e5;
+}
+
+/* ==========================================
+   4. KOMPONEN KARTU, PRODUK & TABEL
+   ================================---------- */
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
   gap: 1.5rem;
   margin-top: 1rem;
 }
 
 .card {
-  padding: 1.5rem;
-  border: 1px solid #ddd;
-  border-radius: 8px;
+  padding: 1.15rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
   background: #fff;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.02);
 }
 
 .card h3 {
   margin-top: 0;
 }
 
-.card h3 a {
-  text-decoration: none;
-  color: #646cff;
-}
-
 .price {
-  font-size: 1.25rem;
+  font-size: 1.1rem;
   font-weight: bold;
-  color: #2e7d32;
+  color: #059669;
 }
 
 .muted {
-  color: #666;
-  font-size: 0.875rem;
+  color: #64748b;
+  font-size: 0.85rem;
 }
 
 .stars {
-  color: #fbc02d;
+  color: #f59e0b;
 }
 
-.alert {
-  padding: 0.75rem 1rem;
-  border-radius: 4px;
-  margin: 1rem 0;
+.badge {
+  display: inline-block;
+  padding: 0.2rem 0.6rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border-radius: 999px;
+  background: #eef2ff;
+  color: #4f46e5;
 }
 
-.alert-error {
-  background: #ffebee;
-  color: #c62828;
-  border: 1px solid #ef9a9a;
+.review-card {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1rem;
 }
 
-.alert-success {
-  background: #e8f5e9;
-  color: #2e7d32;
-  border: 1px solid #a5d6a7;
-}
-
-.form {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  max-width: 500px;
-  margin-top: 1.5rem;
-}
-
-.form label {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-  font-weight: 500;
-}
-
-.form input, .form select, .form textarea {
-  padding: 0.5rem;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  font-family: inherit;
-}
-
-.cart-action {
-  display: flex;
-  gap: 1rem;
-  align-items: center;
-  margin: 1rem 0;
-}
-
-.cart-action input {
-  width: 60px;
-  padding: 0.5rem;
-}
-
+/* ==========================================
+   5. TOMBOL & TABEL KERANJANG
+   ================================---------- */
 button {
   padding: 0.5rem 1rem;
-  background-color: #646cff;
+  background-color: #4f46e5;
   color: white;
   border: none;
-  border-radius: 4px;
+  border-radius: 8px;
   cursor: pointer;
-  font-weight: 500;
+  font-weight: 600;
+  font-size: 0.88rem;
+  transition: background 0.2s;
 }
 
 button:hover {
-  background-color: #535bf2;
-}
-
-button:disabled {
-  background-color: #ccc;
-  cursor: not-allowed;
+  background-color: #4338ca;
 }
 
 .btn-danger {
-  background-color: #e53935;
+  background-color: #ef4444;
 }
 
 .btn-danger:hover {
-  background-color: #c62828;
+  background-color: #dc2626;
 }
 
 .cart-table {
   width: 100%;
   border-collapse: collapse;
   margin-top: 1rem;
+  background: #fff;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid #e2e8f0;
 }
 
 .cart-table th, .cart-table td {
-  border: 1px solid #ddd;
-  padding: 0.75rem;
+  border-bottom: 1px solid #e2e8f0;
+  padding: 0.75rem 1rem;
   text-align: left;
 }
 
 .cart-table th {
-  background-color: #f5f5f5;
+  background-color: #f8fafc;
+  font-weight: 700;
+  color: #1e293b;
 }
 
 .cart-summary {
@@ -190,15 +275,23 @@ button:disabled {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  background: #fff;
+  padding: 1.5rem;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
 }
 
-.review-list {
-  list-style: none;
-  padding: 0;
-  margin: 1rem 0;
-}
-
-.review-list li {
-  padding: 0.75rem 0;
-  border-bottom: 1px solid #eee;
+/* ==========================================
+   6. RESPONSIVE MOBILE
+   ================================---------- */
+@media (max-width: 768px) {
+  .admin-sidebar {
+    width: 70px;
+  }
+  .admin-sidebar-brand span, .admin-menu-item span {
+    display: none;
+  }
+  .admin-main-wrapper {
+    margin-left: 70px;
+  }
 }

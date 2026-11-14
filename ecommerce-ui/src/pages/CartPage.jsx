@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 
 export default function CartPage({ userId }) {
   const [cartItems, setCartItems] = useState([])
+  const navigate = useNavigate()
 
   useEffect(() => {
     const savedCart = JSON.parse(localStorage.getItem(`cart_user_${userId}`)) || [
@@ -24,6 +25,30 @@ export default function CartPage({ userId }) {
     const updatedCart = cartItems.filter(item => item.id !== cartId)
     setCartItems(updatedCart)
     localStorage.setItem(`cart_user_${userId}`, JSON.stringify(updatedCart))
+  }
+
+  // Fungsi Checkout yang mencatat pesanan ke order-service / localStorage orders
+  const handleCheckout = () => {
+    if (cartItems.length === 0) return
+
+    const existingOrders = JSON.parse(localStorage.getItem(`orders_user_${userId}`)) || []
+    const newOrder = {
+      orderId: Math.floor(100000 + Math.random() * 900000),
+      date: new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }),
+      status: 'Pembayaran Berhasil',
+      items: cartItems,
+      total: totalPrice
+    }
+
+    // Simpan ke riwayat pesanan user
+    localStorage.setItem(`orders_user_${userId}`, JSON.stringify([newOrder, ...existingOrders]))
+    
+    // Kosongkan keranjang belanja
+    localStorage.removeItem(`cart_user_${userId}`)
+    setCartItems([])
+
+    alert('Checkout berhasil! Pesanan Anda telah dicatat ke sistem.')
+    navigate('/orders')
   }
 
   const totalPrice = cartItems.reduce((acc, item) => {
@@ -90,7 +115,7 @@ export default function CartPage({ userId }) {
                 Rp {Number(totalPrice).toLocaleString('id-ID')}
               </div>
             </div>
-            <button onClick={() => alert('Checkout berhasil! Terima kasih sudah berbelanja.')}>
+            <button onClick={handleCheckout}>
               Lanjutkan ke Checkout 🚀
             </button>
           </div>
